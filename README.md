@@ -24,6 +24,9 @@ Ray-MMD
 * [Visual studio code](http://code.visualstudio.com/Download)
 
 #### 更新内容 :
+##### 2016-11-27 ver 1.1.0  22:02 (GMT+8)
+* 修复了Tutorial/05-SphereLight IBL出错
+
 ##### 2016-11-26 ver 1.1.0  14:36 (GMT+8)
 * 修复了AmbientLight编译出错
 
