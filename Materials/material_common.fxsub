@@ -1,12 +1,7 @@
-float time : TIME;
-float elapsed : ELAPSEDTIME;
-
 float4x4 matView : VIEW;
 float4x4 matWorld : WORLD;
 float4x4 matWorldView : WORLDVIEW;
 float4x4 matWorldViewProject : WORLDVIEWPROJECTION;
-
-float3 CameraPosition : POSITION  < string Object = "Camera"; >;
 
 float4 MaterialDiffuse : DIFFUSE  < string Object = "Geometry"; >;
 float3 MaterialSpecular : SPECULAR < string Object = "Geometry"; >;
@@ -14,8 +9,6 @@ float  MaterialPower : SPECULARPOWER < string Object = "Geometry"; >;
 
 float4 TextureAddValue : ADDINGTEXTURE;
 float4 TextureMulValue : MULTIPLYINGTEXTURE;
-float4 SphereAddValue  : ADDINGSPHERETEXTURE;
-float4 SphereMulValue  : MULTIPLYINGSPHERETEXTURE;
 
 #if EMISSIVE_APPLY_MORPH_COLOR || ALBEDO_APPLY_MORPH_COLOR
 float MorphRed   : CONTROLOBJECT < string name="(self)"; string item = "R+"; >;
@@ -27,41 +20,14 @@ float MorphBlue  : CONTROLOBJECT < string name="(self)"; string item = "B+"; >;
 float mIntensityP : CONTROLOBJECT < string name="(self)"; string item = "Intensity+"; >;
 float mIntensityM : CONTROLOBJECT < string name="(self)"; string item = "Intensity-"; >;
 
-float emissiveIntensityMin = log(50);
-float emissiveIntensityMax = log(2100);
+static float emissiveIntensityMin = log(50);
+static float emissiveIntensityMax = log(2100);
 static float LightIntensity = lerp(emissiveIntensityMin, emissiveIntensityMax, mIntensityP - mIntensityM);
 #endif
 
-#define TEXTURE_USE_LINEAR 0
-#define TEXTURE_USE_NEAREST 0
-#define TEXTURE_USE_ANISOTROPY 1
-#define TEXTURE_USE_MIP_NONE 0
-#define TEXTURE_USE_MIP_LINEAR 0
-#define TEXTURE_USE_MIP_NEAREST 0
-#define TEXTURE_USE_MIP_ANISOTROPIC 1
+#define TEXTURE_FILTER ANISOTROPIC
+#define TEXTURE_MIP_FILTER ANISOTROPIC
 #define TEXTURE_ANISOTROPY_LEVEL 16
-
-#if TEXTURE_USE_LINEAR
-#   define TEXTURE_FILTER LINEAR
-#elif TEXTURE_USE_NEAREST
-#   define TEXTURE_FILTER POINT
-#elif TEXTURE_USE_ANISOTROPY
-#   define TEXTURE_FILTER ANISOTROPIC
-#else
-#   define TEXTURE_FILTER POINT
-#endif
-
-#if TEXTURE_USE_MIP_LINEAR
-#   define TEXTURE_MIP_FILTER LINEAR
-#elif TEXTURE_USE_MIP_NEAREST
-#   define TEXTURE_MIP_FILTER POINT
-#elif TEXTURE_USE_MIP_ANISOTROPIC
-#   define TEXTURE_MIP_FILTER ANISOTROPIC
-#elif TEXTURE_USE_MIP_NONE
-#   define TEXTURE_MIP_FILTER NONE
-#else
-#   define TEXTURE_MIP_FILTER POINT
-#endif
 
 #define PI 3.141592654f
 
@@ -114,7 +80,11 @@ shared texture Gbuffer8RT: RENDERCOLORTARGET;
 #endif
 
 #if USE_CUSTOM_MATERIAL && ALPHA_MAP_ENABLE && ALPHA_MAP_IN_TEXTURE != 1
-    texture2D AlphaMap<string ResourceName = ALPHA_MAP_FILE;>; 
+    #if ALPHA_MAP_ANIMATION_ENABLE == 0
+        texture2D AlphaMap<string ResourceName = ALPHA_MAP_FILE;>;
+    #else
+        texture2D AlphaMap : ANIMATEDTEXTURE <string ResourceName = ALPHA_MAP_FILE; float speed=ALPHA_MAP_ANIMATION_ENABLE;>;
+    #endif
     sampler AlphaMapSamp = sampler_state
     {
         texture = AlphaMap;
@@ -462,9 +432,7 @@ float3 ColorSynthesis(float3 diffuse, float m)
 
 float GetAlpha(float2 coord, bool use_texture)
 {
-#if SKYBOX_ENABLE
-    return 1;
-#elif USE_CUSTOM_MATERIAL
+#if USE_CUSTOM_MATERIAL
     #if ALPHA_MAP_ENABLE
         #if ALPHA_MAP_UV_FLIP
             coord.y = 1 - coord.y;
@@ -620,9 +588,6 @@ float GetEmissiveIntensity()
 
 float3 GetNormal(float3 N, float3 viewdir, float2 coord)
 {
-#if SKYBOX_ENABLE
-    return -N;
-#endif
 #if USE_CUSTOM_MATERIAL && (NORMAL_MAP_ENABLE || NORMAL_MAP_SUB_ENABLE)
     #if NORMAL_MAP_UV_FLIP
         coord.y = 1 - coord.y;

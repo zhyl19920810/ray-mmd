@@ -24,12 +24,6 @@ Ray-MMD
 * [Visual studio code](http://code.visualstudio.com/Download)
 
 #### 更新内容 :
-##### 2016-11-27 ver 1.1.0  22:02 (GMT+8)
-* 修复了Tutorial/05-SphereLight IBL出错
-
-##### 2016-11-26 ver 1.1.0  14:36 (GMT+8)
-* 修复了AmbientLight编译出错
-
 ##### 2016-11-26 ver 1.1.0
 * __修改了cmft的输出编码，用于支持更大范围的亮度  [(预览)](https://github.com/ray-cast/images/raw/master/cmft_110.jpg)__
 * 改进了SSR
